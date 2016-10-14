@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="SampleAzureCloudService" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2015-04.2.6">
+  <WebRole name="WebRole1" vmsize="Small">
+    <Sites>
+      <Site name="Web">
+        <Bindings>
+          <Binding name="Endpoint1" endpointName="Endpoint1" />
+        </Bindings>
+      </Site>
+    </Sites>
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
+      <Setting name="APPINSIGHTS_INSTRUMENTATIONKEY" />
+    </ConfigurationSettings>
+    <Endpoints>
+      <InputEndpoint name="Endpoint1" protocol="http" port="80" />
+    </Endpoints>
+    <Startup priority="0">
+      <Task taskType="simple" commandLine="Startup.cmd" executionContext="limited">
+        <Environment>
+          <Variable name="VersionNumber" value="1.0.0.0" />
+        </Environment>
+      </Task>
+    </Startup>
+    <LocalResources>
+      <LocalStorage name="MyTempStorage" cleanOnRoleRecycle="true" sizeInMB="1024" />
+    </LocalResources>
+  </WebRole>
+  <WorkerRole name="WorkerRole1" vmsize="ExtraSmall">
+    <Endpoints>
+      <InternalEndpoint name="httpInternal" protocol="http" port="8080" />
+    </Endpoints>
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
+      <Setting name="APPINSIGHTS_INSTRUMENTATIONKEY" />
+    </ConfigurationSettings>
+  </WorkerRole>
+  <NetworkTrafficRules>
+    <OnlyAllowTrafficTo>
+      <Destinations>
+        <RoleEndpoint roleName="WorkerRole1" endpointName="httpInternal" />
+      </Destinations>
+      <WhenSource matches="AnyRule">
+        <FromRole roleName="WebRole1" />
+      </WhenSource>
+    </OnlyAllowTrafficTo>
+  </NetworkTrafficRules>
+</ServiceDefinition>
